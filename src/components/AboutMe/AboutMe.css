@@ -1,0 +1,532 @@
+/* ===== ABOUT ME SECTION STYLES ===== */
+
+/* Rising bubbles/particles matching Hero & Role */
+@keyframes aboutParticle {
+  0%   { transform: translateY(100vh) rotate(0deg);   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+/* Slow ambient blob rotation, matching hero orbs */
+@keyframes blobMorph {
+  0%, 100% {
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    border-radius: 60% 40% 35% 65% / 55% 60% 40% 45%;
+    transform: rotate(180deg) scale(1.05);
+  }
+}
+
+/* Avatar gentle float */
+@keyframes avatarFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+/* Floating badge bob */
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.05); }
+}
+
+/* Ring pulse around avatar */
+@keyframes ringPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 87, 108, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 18px rgba(245, 87, 108, 0);
+  }
+}
+
+/* ---- Section ---- */
+/* Exact flat #0b0d15 background so Hero -> Role -> AboutMe merges seamlessly into 1 continuous page */
+.about-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 6%;
+  background: #0b0d15;
+  border: none !important;
+  overflow: hidden;
+}
+
+/* Soft ambient glow in the background */
+.about-orb {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(240, 147, 251, 0.08) 0%, transparent 70%);
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Rising Bubbles Container */
+.about-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.about-particle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  animation: aboutParticle linear infinite;
+}
+
+/* Container spanning full desktop width seamlessly */
+.about-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1250px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+/* ---- Top Row: Left Text + Right Avatar ---- */
+.about-top-row {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+}
+
+/* ---- Left: text (scroll reveal side animation) ---- */
+.about-text {
+  opacity: 0;
+  transform: translateX(-90px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.1s, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
+}
+
+.about-section.in-view .about-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.about-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.4rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.about-badge i {
+  color: #f5576c;
+}
+
+.about-heading {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 1.3rem;
+}
+
+.about-heading .highlight {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.about-description {
+  font-size: 1.08rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 0.5rem;
+  max-width: 580px;
+}
+
+/* ---- Right: visual (scroll reveal right side) ---- */
+.about-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(90px);
+  transition: opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.25s, transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.25s;
+}
+
+.about-section.in-view .about-visual {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.about-blob {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.25), rgba(245, 87, 108, 0.2));
+  filter: blur(10px);
+  animation: blobMorph 10s ease-in-out infinite;
+  z-index: 0;
+}
+
+.about-image-frame {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  animation: avatarFloat 5s ease-in-out infinite;
+}
+
+.about-image-ring {
+  position: absolute;
+  inset: -14px;
+  border: 1.5px dashed rgba(245, 87, 108, 0.4);
+  border-radius: 50%;
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+.about-avatar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1c1f2b 0%, #12141c 100%);
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(245, 87, 108, 0.06);
+  overflow: hidden;
+}
+
+.about-profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  border-radius: 50%;
+  display: block;
+  z-index: 2;
+}
+
+.about-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.about-avatar-fallback i {
+  font-size: 5.5rem;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.75;
+}
+
+/* Floating badges around the avatar */
+.about-floating-badge {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 14px;
+  background: rgba(17, 19, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5576c;
+  font-size: 1.15rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+  animation: badgeFloat 4s ease-in-out infinite;
+}
+
+/* ---- Bottom Row: 3 Project Cards (`btn-primary` inspired styling) ---- */
+.about-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.8rem;
+  width: 100%;
+}
+
+@keyframes revolveArc {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.about-project-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(18, 20, 31, 0.88);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.6rem 1.8rem;
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(45px);
+  transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+  z-index: 1;
+}
+
+/* Staggered scroll reveal for the 3 cards */
+.about-section.in-view .about-project-card:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0.35s; }
+.about-section.in-view .about-project-card:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
+.about-section.in-view .about-project-card:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.65s; }
+
+/* ::before — The rotating dark/pink gradient arc that spins around the perimeter */
+.about-project-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  height: 250%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    #f093fb 310deg,
+    #f5576c 360deg
+  );
+  transform: translate(-50%, -50%) rotate(0deg);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* ::after — Inner dark mask so ONLY the 1.5px border shows the revolving pink arc! */
+.about-project-card::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: #11131c;
+  border-radius: 18.5px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.35s ease, background 0.35s ease;
+}
+
+/* Hover activates the revolving border arc and subtle dark card glow */
+.about-project-card:hover {
+  border-color: transparent;
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(245, 87, 108, 0.22);
+}
+
+.about-project-card:hover::before {
+  opacity: 1;
+  animation: revolveArc 2.4s linear infinite;
+}
+
+.about-project-card:hover::after {
+  opacity: 1;
+  background: #131522;
+}
+
+/* Inside card items (kept cleanly above pseudo-elements with z-index: 1) */
+.about-card-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  z-index: 1;
+}
+
+.about-card-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.35);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.about-project-card:hover .about-card-icon {
+  transform: scale(1.08) rotate(5deg);
+  box-shadow: 0 10px 25px rgba(245, 87, 108, 0.55);
+}
+
+.about-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-card-count {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.about-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 4px 0 0;
+  transition: color 0.3s ease;
+}
+
+.about-project-card:hover .about-card-title {
+  color: rgba(255, 255, 255, 0.98);
+}
+
+.about-card-arrow {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 1.2rem;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.about-project-card:hover .about-card-arrow {
+  color: #fff;
+  transform: translateX(6px);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .about-top-row {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+    text-align: center;
+  }
+
+  .about-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .about-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .about-section {
+    padding: 5rem 5% 4rem;
+  }
+
+  .about-top-row {
+    gap: 2.5rem;
+  }
+
+  .about-heading {
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+  }
+
+  .about-description {
+    font-size: 1rem;
+  }
+
+  .about-image-frame {
+    width: 220px;
+    height: 220px;
+  }
+
+  .about-blob {
+    width: 250px;
+    height: 250px;
+  }
+
+  .about-badge-float {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .about-section {
+    padding: 5rem 5% 4rem;
+  }
+
+  .about-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .about-image-frame {
+    width: 200px;
+    height: 200px;
+  }
+
+  .about-blob {
+    width: 230px;
+    height: 230px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-section {
+    padding: 4rem 4% 3rem;
+  }
+
+  .about-heading {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+  }
+
+  .about-description {
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .about-image-frame {
+    width: 180px;
+    height: 180px;
+  }
+
+  .about-blob {
+    width: 210px;
+    height: 210px;
+  }
+
+  .about-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-project-card {
+    padding: 1rem 1.2rem;
+  }
+
+  .about-card-count {
+    font-size: 1.5rem;
+  }
+}
+

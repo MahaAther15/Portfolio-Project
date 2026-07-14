@@ -1,0 +1,757 @@
+/* ===== PORTFOLIO SHOWCASE SECTION ===== */
+
+/* Rising particles matching Hero, Role & AboutMe */
+@keyframes portfolioParticle {
+  0%   { transform: translateY(100vh) rotate(0deg);   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+/* Rotating border arc on card hover exactly like About Me cards */
+@keyframes revolvePortfolioArc {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ---- Section ---- */
+.portfolio-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6.5rem 6% 5rem;
+  scroll-margin-top: 90px;
+  background: #0b0d15;
+  border: none !important;
+  overflow: hidden;
+}
+
+/* Ambient glow background orbs */
+.portfolio-orb {
+  position: absolute;
+  width: 650px;
+  height: 650px;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portfolio-orb-left {
+  background: radial-gradient(circle, rgba(240, 147, 251, 0.08) 0%, transparent 70%);
+  top: 15%;
+  left: -10%;
+}
+
+.portfolio-orb-right {
+  background: radial-gradient(circle, rgba(245, 87, 108, 0.08) 0%, transparent 70%);
+  bottom: 15%;
+  right: -10%;
+}
+
+/* Rising Bubbles Container */
+.portfolio-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.portfolio-particle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  animation: portfolioParticle linear infinite;
+}
+
+.portfolio-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1250px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+/* ---- Header ---- */
+.showcase-top-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.1s, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.1s;
+}
+
+.portfolio-section.in-view .showcase-top-header {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.portfolio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.45rem 1.3rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1.3rem;
+  backdrop-filter: blur(4px);
+}
+
+.portfolio-badge i {
+  color: #f5576c;
+}
+
+.portfolio-heading {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 1.1rem;
+}
+
+.portfolio-heading .highlight {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.portfolio-subtitle {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 620px;
+  margin-bottom: 2.5rem;
+}
+
+/* ---- 2 Navigation Tabs ---- */
+.portfolio-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(18, 20, 31, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding: 6px;
+  border-radius: 50px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.portfolio-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.8rem;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.portfolio-tab-btn i {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.portfolio-tab-btn:hover {
+  color: #fff;
+}
+
+.portfolio-tab-btn.active {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.35);
+}
+
+.portfolio-tab-btn.active i {
+  transform: scale(1.1);
+}
+
+/* ====================================================
+   TAB 1: PROJECTS GRID (3 Columns on Desktop)
+==================================================== */
+.portfolio-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.2rem;
+  width: 100%;
+  padding-bottom: 1rem;
+}
+
+.portfolio-project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 20, 31, 0.88);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(45px);
+  transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+  z-index: 1;
+}
+
+.portfolio-section.in-view .portfolio-project-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ::before — Rotating dark/pink conic gradient arc border exactly like About Me cards */
+.portfolio-project-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  height: 250%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    #f093fb 310deg,
+    #f5576c 360deg
+  );
+  transform: translate(-50%, -50%) rotate(0deg);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* ::after — Inner dark mask leaving 1.5px border track where revolving arc glows */
+.portfolio-project-card::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: #11131c;
+  border-radius: 22.5px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.35s ease, background 0.35s ease;
+}
+
+.portfolio-project-card:hover {
+  border-color: transparent;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(245, 87, 108, 0.22);
+}
+
+.portfolio-project-card:hover::before {
+  opacity: 1;
+  animation: revolvePortfolioArc 2.4s linear infinite;
+}
+
+.portfolio-project-card:hover::after {
+  opacity: 1;
+  background: #131522;
+}
+
+/* ---- Card Preview Window ---- */
+.portfolio-card-preview {
+  position: relative;
+  width: 100%;
+  height: 210px;
+  background: #161826;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 1;
+}
+
+.portfolio-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: rgba(14, 16, 24, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.preview-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.preview-dots .dot-r { background: #ff5f56; }
+.preview-dots .dot-y { background: #ffbd2e; }
+.preview-dots .dot-g { background: #27c93f; }
+
+.preview-category {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--acc, #f5576c);
+}
+
+.portfolio-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  z-index: 2;
+  transition: transform 0.5s ease;
+}
+
+.portfolio-project-card:hover .portfolio-preview-img {
+  transform: scale(1.06);
+}
+
+/* CSS Vector Mockup Fallback when src="" is empty */
+.portfolio-preview-fallback {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(240, 147, 251, 0.08) 0%, transparent 70%);
+  gap: 0.8rem;
+  z-index: 1;
+}
+
+.fallback-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--fc, #f5576c);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  transition: transform 0.4s ease;
+}
+
+.portfolio-project-card:hover .fallback-icon-wrap {
+  transform: scale(1.12) rotate(6deg);
+}
+
+.fallback-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Hover Overlay */
+.portfolio-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 21, 0.88);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 3;
+}
+
+.portfolio-project-card:hover .portfolio-preview-overlay {
+  opacity: 1;
+}
+
+.overlay-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.65rem 1.3rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.overlay-action-btn.primary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+}
+
+.overlay-action-btn.primary:hover {
+  transform: scale(1.05);
+}
+
+.overlay-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.overlay-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* ---- Card Body ---- */
+.portfolio-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 1.8rem;
+  flex: 1;
+  z-index: 1;
+}
+
+.portfolio-card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.7rem;
+  transition: color 0.3s ease;
+}
+
+.portfolio-project-card:hover .portfolio-card-title {
+  color: #f093fb;
+}
+
+.portfolio-card-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1.4rem;
+  flex: 1;
+}
+
+/* Tech Tags Pills */
+.portfolio-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.6rem;
+}
+
+.portfolio-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.portfolio-project-card:hover .portfolio-tag {
+  background: rgba(245, 87, 108, 0.12);
+  border-color: rgba(245, 87, 108, 0.3);
+  color: #fff;
+}
+
+/* Footer Action Buttons */
+.portfolio-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.portfolio-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.portfolio-link-btn i {
+  font-size: 0.85rem;
+  color: #f5576c;
+  transition: transform 0.3s ease;
+}
+
+.portfolio-project-card:hover .portfolio-link-btn i {
+  transform: translateX(5px);
+}
+
+.portfolio-git-link {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.portfolio-git-link:hover {
+  background: #fff;
+  color: #11131c;
+  transform: scale(1.1);
+}
+
+/* ====================================================
+   TAB 2: TECH STACK CATEGORIES
+==================================================== */
+.portfolio-tech-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  width: 100%;
+  padding-bottom: 1rem;
+}
+
+.portfolio-tech-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.portfolio-section.in-view .portfolio-tech-group {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tech-group-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tech-group-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--gc, #f5576c);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tech-group-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.tech-group-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.portfolio-tech-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: rgba(18, 20, 31, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.3rem 1.5rem;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.portfolio-tech-card:hover {
+  border-color: var(--tc, #f5576c);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 25px rgba(245, 87, 108, 0.05);
+}
+
+.tech-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: var(--tc, #f5576c);
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.portfolio-tech-card:hover .tech-card-icon {
+  transform: scale(1.15) rotate(6deg);
+}
+
+.tech-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tech-card-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 3px;
+}
+
+.tech-card-level {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.tech-card-indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  background: var(--tc, #f5576c);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portfolio-tech-card:hover .tech-card-indicator {
+  opacity: 1;
+}
+
+/* ---- Responsive Breakpoints ---- */
+@media (max-width: 1024px) {
+  .portfolio-projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tech-group-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-section {
+    padding: 5rem 5% 4rem;
+  }
+
+  .portfolio-heading {
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+  }
+
+  .portfolio-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .portfolio-projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.4rem;
+  }
+
+  .portfolio-card-preview {
+    height: 160px;
+  }
+}
+
+@media (max-width: 680px) {
+  .portfolio-section {
+    padding: 5rem 5% 4rem;
+  }
+
+  .portfolio-projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tech-group-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-tabs {
+    flex-direction: column;
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .portfolio-tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-section {
+    padding: 4rem 4% 3rem;
+  }
+
+  .portfolio-heading {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+  }
+
+  .portfolio-badge {
+    font-size: 0.72rem;
+  }
+
+  .portfolio-projects-grid {
+    gap: 1.2rem;
+  }
+
+  .portfolio-card-body {
+    padding: 1rem 1.1rem;
+  }
+
+  .portfolio-card-title {
+    font-size: 1rem;
+  }
+
+  .portfolio-card-desc {
+    font-size: 0.82rem;
+  }
+
+  .portfolio-tag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.7rem;
+  }
+
+  .tech-card-name {
+    font-size: 0.92rem;
+  }
+
+  .fallback-icon-wrap {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+}
+

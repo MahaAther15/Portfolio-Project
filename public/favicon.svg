@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- Screen Stand Base -->
+  <path d="M18 54 h28 a2 2 0 0 1 2 2 v2 h-32 v-2 a2 2 0 0 1 2 -2 z" fill="#cbd5e1" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Screen Stand Neck -->
+  <path d="M26 44 h12 v10 h-12 z" fill="#94a3b8" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Screen Monitor Body -->
+  <rect x="8" y="10" width="48" height="34" rx="4" fill="#fff" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Screen Inner Display -->
+  <rect x="11" y="13" width="42" height="26" rx="2" fill="#dbeafe" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+  
+  <!-- Code Brackets </ > inside display -->
+  <path d="M22 26 l-5 4 l5 4" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M42 26 l5 4 l-5 4" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 23 l-4 14" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Bottom-Left Gear (centered around x=14, y=44) -->
+  <g transform="translate(14, 44)">
+    <!-- 8 Gear Teeth -->
+    <path d="M-3 -13 h6 l1.5 3 h-9 z M-3 13 h6 l1.5 -3 h-9 z M-13 -3 v6 l3 1.5 v-9 z M13 -3 v6 l-3 1.5 v-9 z M-9.5 -9.5 l4.2 4.2 l-2.1 2.1 l-4.2 -4.2 z M9.5 9.5 l-4.2 -4.2 l2.1 -2.1 l4.2 4.2 z M9.5 -9.5 l-4.2 4.2 l2.1 2.1 l4.2 -4.2 z M-9.5 9.5 l4.2 -4.2 l-2.1 -2.1 l-4.2 4.2 z" fill="#fde047" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="10" fill="#fde047" stroke="#000" stroke-width="3"/>
+    <circle cx="0" cy="0" r="4.5" fill="#fff" stroke="#000" stroke-width="3"/>
+  </g>
+  
+  <!-- Top-Right Gear (centered around x=50, y=14) -->
+  <g transform="translate(50, 14)">
+    <!-- 8 Gear Teeth -->
+    <path d="M-3 -13 h6 l1.5 3 h-9 z M-3 13 h6 l1.5 -3 h-9 z M-13 -3 v6 l3 1.5 v-9 z M13 -3 v6 l-3 1.5 v-9 z M-9.5 -9.5 l4.2 4.2 l-2.1 2.1 l-4.2 -4.2 z M9.5 9.5 l-4.2 -4.2 l2.1 -2.1 l4.2 4.2 z M9.5 -9.5 l-4.2 4.2 l2.1 2.1 l4.2 -4.2 z M-9.5 9.5 l4.2 -4.2 l-2.1 -2.1 l-4.2 4.2 z" fill="#fde047" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="10" fill="#fde047" stroke="#000" stroke-width="3"/>
+    <circle cx="0" cy="0" r="4.5" fill="#fff" stroke="#000" stroke-width="3"/>
+  </g>
+</svg>

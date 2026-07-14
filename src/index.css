@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/* ===== GLOBAL BASE STYLES ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0b0d15;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+
+
+/* ===== GLOBAL SCROLLBAR STYLES ===== */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: #0b0d15;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #f5576c 0%, #f093fb 100%);
+  border-radius: 10px;
+  border: 2px solid #0b0d15;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Firefox support */
+html, body, * {
+  scrollbar-width: thin;
+  scrollbar-color: #f5576c #0b0d15;
+}
+
+/* Remove default list styles */
+ul {
+  list-style: none;
+}
+
+/* Remove default link styles */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+

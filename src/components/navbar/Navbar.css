@@ -1,0 +1,311 @@
+/* ===== NAVBAR ANIMATIONS & STYLES ===== */
+.portfolio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* logo left, nav center, right group right */
+  padding: 1rem 2rem;
+  /* same padding jo logo ke left side pe hai, wahi right side ko bhi milega */
+}
+
+.nav-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Slide-down entrance animation */
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.nav-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Nav link fade-in stagger */
+@keyframes fadeInNav {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo glow pulse */
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(245, 87, 108, 0.3));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 20px rgba(245, 87, 108, 0.6));
+  }
+}
+
+/* ---- Header ---- */
+.portfolio-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.2rem 6%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(11, 13, 21, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  animation: slideDown 0.8s ease forwards;
+  transform: translateY(-100%);
+}
+
+/* ---- Logo ---- */
+.portfolio-logo {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glowPulse 3s ease-in-out infinite;
+  cursor: default;
+}
+
+.portfolio-logo span {
+  font-weight: 300;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
+/* ---- Nav links ---- */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: color 0.3s ease;
+  padding-bottom: 4px;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  transition: width 0.4s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #fff;
+}
+
+/* ---- Nav item stagger animation ---- */
+.nav-item {
+  opacity: 0;
+  animation: fadeInNav 0.5s ease forwards;
+}
+
+.nav-item:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.nav-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.nav-item:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.nav-item:nth-child(4) {
+  animation-delay: 0.5s;
+}
+
+.nav-item:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+/* ---- CTA Button ---- */
+.nav-cta {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding: 0.5rem 1.4rem;
+  border-radius: 50px;
+  color: #fff !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.nav-cta::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.nav-cta:hover::before {
+  transform: rotate(45deg) translateX(100%);
+}
+
+.nav-cta:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 0 30px rgba(245, 87, 108, 0.5);
+}
+
+/* Remove underline pseudo from CTA */
+.nav-cta::after {
+  display: none !important;
+}
+
+/* ---- Hamburger Button ---- */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  z-index: 1001;
+  padding: 4px;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 4px;
+  transition: 0.3s ease;
+  display: block;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .portfolio-header {
+    padding: 1rem 5%;
+  }
+
+  .nav-right {
+    display: none;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 75%;
+    max-width: 300px;
+    height: 100vh;
+    background: rgba(11, 13, 21, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    transition: right 0.4s ease;
+    padding: 2rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    z-index: 999;
+  }
+
+  .nav-menu.open {
+    right: 0;
+  }
+
+  /* Overlay when menu is open */
+  .nav-menu.open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    right: 75%;
+    background: transparent;
+    z-index: -1;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-link {
+    font-size: 1.1rem;
+  }
+
+  /* Show CTA inside mobile menu */
+  .nav-menu .nav-cta {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.6rem 2rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-header {
+    padding: 0.85rem 4%;
+  }
+
+  .portfolio-logo {
+    font-size: 1.4rem;
+  }
+
+  .nav-menu {
+    width: 85%;
+    max-width: 280px;
+  }
+}
