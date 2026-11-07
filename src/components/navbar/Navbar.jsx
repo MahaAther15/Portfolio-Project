@@ -1,98 +1,93 @@
 import { useState, useEffect, useCallback } from 'react';
+import Logo from '../Logo/Logo';
 import './Navbar.css';
 
 const NAV_LINKS = [
-    { label: 'Home', href: '#home' },
-    { label: 'About Me', href: '#about' },
-    { label: 'Portfolio Showcase', href: '#portfolio' },
-    { label: 'Contact', href: '#contact' },
+  { label: 'Work', href: '#portfolio' },
+  { label: 'Skills', href: '#role-section' },
+  { label: 'About', href: '#about' },
+  { label: 'Contact', href: '#contact' },
 ];
 
 function Navbar() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [activeLink, setActiveLink] = useState('#home');
-    const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeLink, setActiveLink] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
 
-    // Close menu on outside click
-    const handleOutsideClick = useCallback((e) => {
-        if (!e.target.closest('header') && isMenuOpen) {
-            setIsMenuOpen(false);
-        }
-    }, [isMenuOpen]);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
-    useEffect(() => {
-        document.addEventListener('click', handleOutsideClick);
-        return () => document.removeEventListener('click', handleOutsideClick);
-    }, [handleOutsideClick]);
-
-    // Track scroll for header shadow
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
-    const handleLinkClick = (href) => {
-        setActiveLink(href);
-        setIsMenuOpen(false);
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest('header')) closeMenu();
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeMenu();
     };
 
-    return (
-        <header
-            className={`portfolio-header ${isScrolled ? 'shadow-lg shadow-black/20' : ''}`}
-        >
-            {/* Logo */}
-            <div className="portfolio-logo">
-                Portfolio<span>.</span>
-            </div>
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeMenu]);
 
-            {/* Navigation */}
-            <nav className="nav-wrapper">
-                <ul
-                    id="navMenu"
-                    className={`nav-menu flex items-center justify-center gap-10 ${isMenuOpen ? 'open' : ''}`}
-                >
-                    {NAV_LINKS.map((link) => (
-                        <li key={link.href} className="nav-item">
-                            <a
-                                href={link.href}
-                                className={`nav-link ${activeLink === link.href ? 'active' : ''}`}
-                                onClick={() => handleLinkClick(link.href)}
-                            >
-                                {link.label}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+  const handleLinkClick = (href) => {
+    setActiveLink(href);
+    closeMenu();
+  };
 
-            {/* Right: CTA button */}
-            <div className="nav-right">
+  return (
+    <header className={`portfolio-header ${isScrolled ? 'scrolled' : ''}`}>
+      <div className="nav-container">
+        <div className="nav-brand">
+          <a className="portfolio-logo" href="#home" onClick={() => handleLinkClick('')} aria-label="Maha, back to top">
+            <Logo className="logo-svg" />
+          </a>
+          <div className="nav-status-pill">
+            <span className="status-indicator" aria-hidden="true" />
+            <span>Available for work</span>
+          </div>
+        </div>
+
+        <nav className={`nav-wrapper ${isMenuOpen ? 'menu-open' : ''}`} aria-label="Main navigation">
+          <ul id="navMenu" className="nav-menu">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href} className="nav-item">
                 <a
-                    href="#contact"
-                    className="nav-link nav-cta"
-                    onClick={() => handleLinkClick('#contact')}
+                  href={link.href}
+                  className={`nav-link ${activeLink === link.href ? 'active' : ''}`}
+                  aria-current={activeLink === link.href ? 'location' : undefined}
+                  onClick={() => handleLinkClick(link.href)}
                 >
-                    Let's Talk
+                  {link.label}
                 </a>
-            </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-            {/* Hamburger (mobile) */}
-            <button
-                className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-                onClick={toggleMenu}
-                aria-label="Toggle menu"
-            >
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </header>
-    );
+        <a href="#contact" className="nav-cta" onClick={() => handleLinkClick('#contact')}>
+          Let&apos;s talk
+        </a>
+
+        <button
+          className={`hamburger ${isMenuOpen ? 'active' : ''}`}
+          type="button"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-controls="navMenu"
+          aria-expanded={isMenuOpen}
+        >
+          <span />
+          <span />
+        </button>
+      </div>
+    </header>
+  );
 }
 
 export default Navbar;

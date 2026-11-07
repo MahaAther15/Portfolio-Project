@@ -1,105 +1,65 @@
-import { useMemo } from 'react';
+import { Suspense, lazy } from 'react';
+import { motion } from 'framer-motion';
 import './Hero.css';
 
-// Social link configuration
+const HeroScene = lazy(() => import('./HeroScene'));
+
 const SOCIAL_LINKS = [
   { href: 'https://github.com/MahaAther15/', label: 'GitHub', icon: 'fab fa-github' },
-  { href: 'www.linkedin.com/in/maha-ather22', label: 'LinkedIn', icon: 'fab fa-linkedin-in' },
-  { href: '#', label: 'Dribbble', icon: 'fab fa-dribbble' },
+  { href: 'https://www.linkedin.com/in/maha-ather22', label: 'LinkedIn', icon: 'fab fa-linkedin-in' },
 ];
 
-// Generate particle data once (deterministic)
-function generateParticles(count) {
-  const particles = [];
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      id: i,
-      size: Math.random() * 4 + 2,
-      x: Math.random() * 100,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 20,
-      opacity: Math.random() * 0.5 + 0.1,
-    });
-  }
-  return particles;
-}
-
 function Hero() {
-  const particles = useMemo(() => generateParticles(50), []);
-
   return (
-    <section className="hero-section" id="home">
-      {/* Background Orbs */}
-      <div className="hero-orb-1" />
-      <div className="hero-orb-2" />
+    <section className="hero-section" id="home" aria-labelledby="hero-title">
+      <div className="hero-grid">
+        <motion.div
+          className="hero-copy"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="hero-role">Software engineer</p>
 
-      {/* Floating Particles */}
-      <div className="particles-container">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="particle"
-            style={{
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              left: `${p.x}%`,
-              animationDuration: `${p.duration}s`,
-              animationDelay: `${p.delay}s`,
-              opacity: p.opacity,
-            }}
-          />
-        ))}
+          <h1 className="hero-title" id="hero-title">
+            I build web apps, mobile apps and AI tools that people actually use.
+          </h1>
+
+          <p className="hero-lead">
+            React and Flutter on the front, Python and C# behind them. I care about fast,
+            well-structured code and interfaces that feel considered down to the last detail.
+          </p>
+
+          <ul className="hero-socials" aria-label="Profiles">
+            {SOCIAL_LINKS.map((social) => (
+              <li key={social.label}>
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  aria-label={social.label}
+                >
+                  <i className={social.icon} aria-hidden="true" />
+                  <span>{social.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
+        <motion.div
+          className="hero-visual"
+          aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.4, delay: 0.2, ease: 'easeOut' }}
+        >
+          <Suspense fallback={null}>
+            <HeroScene />
+          </Suspense>
+        </motion.div>
       </div>
-
-      {/* Main Content */}
-      <div className="hero-content">
-        {/* Badge */}
-        {/* <div className="hero-badge">
-          <i className="fas fa-code" /> 2026 · Creative Developer
-        </div> */}
-
-        {/* Heading */}
-        <h1 className="hero-heading">
-          <span className="highlight ">Portfolio Website</span>
-        </h1>
-
-        {/* Description */}
-        <p className="hero-description">
-          I'm a passionate designer &amp; developer crafting digital
-          experiences that are fast, modern, and human-centered.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="hero-buttons">
-          <a href="#portfolio" className="btn-secondary">
-            <i className="fas fa-paper-plane mr-2" /> Explore My Work          </a>
-        </div>
-
-        {/* Social Links */}
-        <div className="hero-social">
-          {SOCIAL_LINKS.map((social) => (
-            <a
-              key={social.label}
-              href={social.href}
-              aria-label={social.label}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i className={social.icon} />
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Scroll Down Indicator */}
-      {/* <button
-        className="scroll-indicator"
-        onClick={handleScrollDown}
-        aria-label="Scroll down"
-      >
-        <span>Scroll</span>
-        <i className="fas fa-chevron-down" />
-      </button> */}
     </section>
   );
 }

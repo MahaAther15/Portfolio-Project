@@ -1,291 +1,189 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { motion, AnimatePresence, useAnimationFrame } from 'framer-motion';
+import { LogoMark } from '../Logo/Logo';
 import './Role.css';
-import { useScrollReveal } from '../../hooks/useScrollReveal';
 
-const ROLES = [
-    { label: 'WEB Developer', icon: 'fas fa-code', color: '#f5576c' },
-    { label: 'UI/UX Designer', icon: 'fas fa-pen-nib', color: '#f093fb' },
-    { label: 'React Specialist', icon: 'fab fa-react', color: '#61dafb' },
-    { label: 'Creative Coder', icon: 'fas fa-wand-magic-sparkles', color: '#a78bfa' },
-    { label: 'App Developer', icon: 'fab fa-android', color: '#22c55e' },
-    { label: 'Asp.net', icon: 'fas fa-server', color: '#fbbf24' }
+const SKILLS = [
+  // inner ring
+  { id: 'react', name: 'React.js', icon: 'fab fa-react', color: '#2a9bb8', desc: 'Component architecture and hooks' },
+  { id: 'flutter', name: 'Flutter', icon: 'fas fa-mobile-screen', color: '#02569B', desc: 'Cross-platform mobile apps' },
+  { id: 'python', name: 'Python', icon: 'fab fa-python', color: '#3776ab', desc: 'AI agents, automation and ML' },
+  { id: 'javascript', name: 'JavaScript', icon: 'fab fa-js', color: '#c9a400', desc: 'Modern async code and core logic' },
+  { id: 'dart', name: 'Dart', icon: 'fas fa-terminal', color: '#0175C2', desc: 'The language behind Flutter' },
+  { id: 'csharp', name: 'C# / .NET', icon: 'fas fa-laptop-code', color: '#9b4f96', desc: 'Enterprise systems' },
+  { id: 'langchain', name: 'LangChain', icon: 'fas fa-robot', color: '#1f8f6a', desc: 'LLM agents and prompt chains' },
+  // outer ring
+  { id: 'tailwind', name: 'Tailwind CSS', icon: 'fas fa-wind', color: '#2a9bb8', desc: 'Utility-first styling' },
+  { id: 'firebase', name: 'Firebase', icon: 'fas fa-fire', color: '#d98a00', desc: 'Realtime sync and auth' },
+  { id: 'sql', name: 'SQL', icon: 'fas fa-database', color: '#d4651a', desc: 'Data modeling and queries' },
+  { id: 'html5', name: 'HTML5', icon: 'fab fa-html5', color: '#e34c26', desc: 'Accessible, semantic markup' },
+  { id: 'css3', name: 'CSS3', icon: 'fab fa-css3-alt', color: '#264de4', desc: 'Layout and motion' },
+  { id: 'cpp', name: 'C++ & DSA', icon: 'fas fa-code', color: '#3b6fc4', desc: 'Algorithms and fast compute' },
+  { id: 'redux', name: 'Redux Toolkit', icon: 'fas fa-cubes-stacked', color: '#764abc', desc: 'Global state management' },
+  { id: 'git', name: 'Git & GitHub', icon: 'fab fa-git-alt', color: '#f05032', desc: 'Version control and branching' },
+  { id: 'figma', name: 'Figma', icon: 'fab fa-figma', color: '#a259ff', desc: 'UI design and prototyping' },
+  { id: 'streamlit', name: 'Streamlit', icon: 'fas fa-chart-line', color: '#e0383e', desc: 'AI dashboards and prototypes' },
+  { id: 'n8n', name: 'n8n', icon: 'fas fa-network-wired', color: '#ea580c', desc: 'Automated workflows' },
+  { id: 'aspnet', name: 'ASP.NET Core', icon: 'fas fa-server', color: '#512bd4', desc: 'REST APIs and controllers' },
+  { id: 'threejs', name: 'Three.js', icon: 'fas fa-cube', color: '#2b1c15', desc: 'Realtime 3D graphics' },
 ];
 
-const TECH_BADGES = [
-    { icon: 'fab fa-html5', label: 'HTML5', color: '#e34c26' },
-    { icon: 'fab fa-css3-alt', label: 'CSS3', color: '#264de4' },
-    { icon: 'fab fa-js', label: 'JS', color: '#f0db4f' },
-    { icon: 'fab fa-react', label: 'React', color: '#61dafb' },
-    { icon: 'fab fa-git-alt', label: 'Git', color: '#f05032' },
-    { icon: 'fab fa-figma', label: 'Figma', color: '#a259ff' },
-];
-
-function generateParticles(count) {
-    return Array.from({ length: count }, (_, i) => ({
-        id: i,
-        size: Math.random() * 3 + 1.5,
-        x: Math.random() * 100,
-        duration: Math.random() * 18 + 12,
-        delay: Math.random() * 15,
-        opacity: Math.random() * 0.4 + 0.1,
-    }));
-}
+const INNER_COUNT = 7;
+const INNER_R = 118;
+const OUTER_R = 218;
 
 function Role() {
-    const [activeRole, setActiveRole] = useState(0);
-    const [sectionRef, visible] = useScrollReveal(0.2);
-    const particles = useMemo(() => generateParticles(35), []);
+  const [hovered, setHovered] = useState(null);
+  const stageRef = useRef(null);
+  const nodeRefs = useRef([]);
 
-    // Typewriter effect for Name ('Maha Ather') inside laptop monitor
-    const [typedName, setTypedName] = useState('');
-    const fullName = 'Maha Ather';
+  // Mutable animation state lives in refs so the loop never re-renders React.
+  const target = useRef({ x: 0, y: 0, active: 0 });
+  const mouse = useRef({ x: 0, y: 0, active: 0 });
+  const clock = useRef({ angle: 0, speed: 1 });
+  const hoverRef = useRef(null);
 
-    useEffect(() => {
-        let currentIndex = 0;
-        let isDeleting = false;
-        const interval = setInterval(() => {
-            if (!isDeleting) {
-                if (currentIndex <= fullName.length) {
-                    setTypedName(fullName.slice(0, currentIndex));
-                    currentIndex++;
-                } else {
-                    // Pause for 3.5 seconds once fully typed before re-typing
-                    isDeleting = true;
-                }
-            } else {
-                if (currentIndex >= 0) {
-                    setTypedName(fullName.slice(0, currentIndex));
-                    currentIndex--;
-                } else {
-                    isDeleting = false;
-                    currentIndex = 0;
-                }
-            }
-        }, 130);
-        return () => clearInterval(interval);
-    }, []);
+  const nodes = useMemo(
+    () =>
+      SKILLS.map((skill, i) => {
+        const inner = i < INNER_COUNT;
+        const count = inner ? INNER_COUNT : SKILLS.length - INNER_COUNT;
+        const idx = inner ? i : i - INNER_COUNT;
+        return {
+          ...skill,
+          radius: inner ? INNER_R : OUTER_R,
+          base: (idx / count) * Math.PI * 2 - Math.PI / 2 + (inner ? 0 : 0.22),
+          dir: inner ? 1 : -1,
+          speed: inner ? 0.085 : 0.05,
+          floatPhase: i * 1.37,
+        };
+      }),
+    [],
+  );
 
-    useEffect(() => {
-        const id = setInterval(
-            () => setActiveRole((p) => (p + 1) % ROLES.length),
-            2800
-        );
-        return () => clearInterval(id);
-    }, []);
+  useAnimationFrame((time, delta) => {
+    const dt = Math.min(delta, 50) / 1000;
+    const t = time / 1000;
+    const m = mouse.current;
+    const g = target.current;
 
-    return (
-        <section className="role-section" id="role-section" ref={sectionRef}>
+    // critically-damped style easing, frame-rate independent
+    const ease = 1 - Math.pow(0.0012, dt);
+    m.x += (g.x - m.x) * ease;
+    m.y += (g.y - m.y) * ease;
+    m.active += (g.active - m.active) * ease;
 
-            {/* shared particles — same animation as Hero, seamless */}
-            <div className="role-particles" aria-hidden="true">
-                {particles.map((p) => (
-                    <div
-                        key={p.id}
-                        className="role-particle"
-                        style={{
-                            width: `${p.size}px`,
-                            height: `${p.size}px`,
-                            left: `${p.x}%`,
-                            animationDuration: `${p.duration}s`,
-                            animationDelay: `${p.delay}s`,
-                            opacity: p.opacity,
-                        }}
-                    />
-                ))}
-            </div>
+    // slow the orbit down when a node is hovered, resume smoothly afterwards
+    const wanted = hoverRef.current ? 0.12 : 1;
+    clock.current.speed += (wanted - clock.current.speed) * (1 - Math.pow(0.004, dt));
+    clock.current.angle += dt * clock.current.speed;
 
-            <div className={`role-inner ${visible ? 'role-visible' : ''}`}>
+    nodes.forEach((n, i) => {
+      const el = nodeRefs.current[i];
+      if (!el) return;
+      const a = n.base + n.dir * clock.current.angle * n.speed * Math.PI * 2;
+      let x = Math.cos(a) * n.radius;
+      let y = Math.sin(a) * n.radius;
 
-                {/* ──────── LEFT ──────── */}
-                <div className="role-left">
+      // gentle drift
+      x += Math.sin(t * 0.7 + n.floatPhase) * 3;
+      y += Math.cos(t * 0.6 + n.floatPhase) * 3;
 
-                    <div className="role-label role-a1">
-                        <i className="fas fa-circle-dot" /> What I Do
-                    </div>
+      // magnetic push away from the pointer
+      const dx = x - m.x;
+      const dy = y - m.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const influence = Math.max(0, 1 - dist / 170) * m.active;
+      const eased = influence * influence * (3 - 2 * influence);
+      x += (dx / dist) * eased * 30;
+      y += (dy / dist) * eased * 30;
 
-                    <h2 className="role-heading role-a2">
-                        I'm a{' '}
-                        <span
-                            className="role-highlight"
-                            key={activeRole}          /* remount → restart animation */
-                            style={{ '--rc': ROLES[activeRole].color }}
-                        >
-                            <i className={`${ROLES[activeRole].icon} role-icon-spin`} />
-                            {ROLES[activeRole].label}
-                        </span>
-                    </h2>
+      el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+    });
+  });
 
-                    <p className="role-desc role-a3">
-                        Building fast, pixel-perfect interfaces with modern tools.
-                        I bridge great design and clean code — turning ideas into
-                        immersive digital experiences.
-                    </p>
+  const handleMove = (e) => {
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    // account for the mobile scale transform
+    const scale = rect.width / stageRef.current.offsetWidth || 1;
+    target.current.x = (e.clientX - rect.left - rect.width / 2) / scale;
+    target.current.y = (e.clientY - rect.top - rect.height / 2) / scale;
+    target.current.active = 1;
+  };
 
-                    {/* Role selector pills */}
-                    <div className="role-pills role-a4">
-                        {ROLES.map((r, i) => (
-                            <button
-                                key={r.label}
-                                className={`role-pill ${activeRole === i ? 'active' : ''}`}
-                                style={{ '--pc': r.color }}
-                                onClick={() => setActiveRole(i)}
-                            >
-                                <i className={r.icon} /> {r.label}
-                            </button>
-                        ))}
-                    </div>
+  const handleLeave = () => {
+    target.current.active = 0;
+    hoverRef.current = null;
+    setHovered(null);
+  };
 
-                    {/* Tech badges */}
-                    <div className="role-tech role-a5">
-                        <span className="role-tech-lbl">Tech Stack</span>
-                        <div className="role-badges">
-                            {TECH_BADGES.map((b) => (
-                                <div key={b.label} className="role-badge" style={{ '--bc': b.color }}>
-                                    <i className={b.icon} />{b.label}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+  const enter = (skill) => {
+    hoverRef.current = skill.id;
+    setHovered(skill);
+  };
+  const leave = () => {
+    hoverRef.current = null;
+    setHovered(null);
+  };
 
-                {/* ──────── RIGHT — CSS illustration ──────── */}
-                <div className="role-right role-a6" aria-hidden="true">
+  return (
+    <section className="role-section" id="role-section" aria-labelledby="skills-heading">
+      <div className="role-container">
+        <h2 className="skills-title" id="skills-heading">Skills</h2>
 
-                    {/* Monitor frame */}
-                    <div className="mon-wrap">
-                        <div className="mon-frame">
-                            <div className="mon-screen">
+        <div
+          className="skills-circle-stage"
+          ref={stageRef}
+          onMouseMove={handleMove}
+          onMouseLeave={handleLeave}
+        >
+          <span className="orbit-ring orbit-ring-inner" style={{ width: INNER_R * 2, height: INNER_R * 2 }} aria-hidden="true" />
+          <span className="orbit-ring orbit-ring-outer" style={{ width: OUTER_R * 2, height: OUTER_R * 2 }} aria-hidden="true" />
 
-                                {/* Top browser bar */}
-                                <div className="mon-bar">
-                                    <span className="dot r" /><span className="dot a" /><span className="dot g" />
-                                    <span className="mon-url">portfolio.dev</span>
-                                </div>
+          <div className="constellation-center" aria-hidden="true">
+            <span className="center-halo" />
+            <LogoMark className="center-mark" />
+          </div>
 
-                                {/* Code lines inside screen */}
-                                <div className="mon-code">
-                                    <div className="mc-line" style={{ '--d': '0s' }}>
-                                        <span className="mc-kw">const</span>
-                                        <span className="mc-var"> dev</span>
-                                        <span className="mc-op"> =</span>
-                                        <span className="mc-str"> &#123;</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.15s' }}>
-                                        <span className="mc-ind" />
-                                        <span className="mc-key">name</span>
-                                        <span className="mc-op">:</span>
-                                        <span className="mc-str"> '{typedName}'</span>
-                                        <span className="mc-cursor" />
-                                        <span className="mc-op">,</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.3s' }}>
-                                        <span className="mc-ind" />
-                                        <span className="mc-key">role</span>
-                                        <span className="mc-op">:</span>
-                                        <span className="mc-str"> '{ROLES[activeRole].label}'</span>
-                                        <span className="mc-op">,</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.45s' }}>
-                                        <span className="mc-ind" />
-                                        <span className="mc-key">skills</span>
-                                        <span className="mc-op">:</span>
-                                        <span className="mc-bracket"> [</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.6s' }}>
-                                        <span className="mc-ind2" />
-                                        <span className="mc-str">'React', 'CSS', 'JS'</span>
-                                        <span className="mc-op">,</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.75s' }}>
-                                        <span className="mc-ind" />
-                                        <span className="mc-bracket">]</span>
-                                        <span className="mc-op">,</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '.9s' }}>
-                                        <span className="mc-ind" />
-                                        <span className="mc-key">passion</span>
-                                        <span className="mc-op">:</span>
-                                        <span className="mc-bool"> true</span>
-                                        <span className="mc-op">,</span>
-                                    </div>
-                                    <div className="mc-line" style={{ '--d': '1.05s' }}>
-                                        <span className="mc-str">&#125;</span>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Monitor stand */}
-                            <div className="mon-neck" />
-                            <div className="mon-base" />
-                        </div>
+          <ul className="constellation-nodes">
+            {nodes.map((skill, i) => (
+              <li
+                key={skill.id}
+                className={`skill-node ${hovered?.id === skill.id ? 'hovered' : ''}`}
+                ref={(el) => (nodeRefs.current[i] = el)}
+                onMouseEnter={() => enter(skill)}
+                onMouseLeave={leave}
+              >
+                <span className="skill-icon-bubble" style={{ '--node-color': skill.color }}>
+                  <i className={skill.icon} aria-hidden="true" />
+                  <span className="sr-only">{skill.name}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
 
-                        {/* ── Floating elements around the monitor ── */}
-
-                        {/* Gear big */}
-                        <div className="fl-el fl-gear1">
-                            <i className="fas fa-gear" />
-                        </div>
-                        {/* Gear small */}
-                        <div className="fl-el fl-gear2">
-                            <i className="fas fa-gear" />
-                        </div>
-                        {/* Code bracket */}
-                        <div className="fl-el fl-bracket">
-                            <span>&lt;/&gt;</span>
-                        </div>
-                        {/* Star */}
-                        <div className="fl-el fl-star">
-                            <i className="fas fa-star" />
-                        </div>
-                        {/* Sparkle */}
-                        <div className="fl-el fl-spark">
-                            <i className="fas fa-wand-magic-sparkles" />
-                        </div>
-                        {/* React atom */}
-                        <div className="fl-el fl-atom">
-                            <i className="fab fa-react" />
-                        </div>
-
-                        {/* Glow chips (badges floating) */}
-                        <div className="fl-chip fc-top">
-                            <i className="fas fa-bolt" /> Fast
-                        </div>
-                        <div className="fl-chip fc-right">
-                            <i className="fas fa-palette" /> Design
-                        </div>
-                        <div className="fl-chip fc-bot">
-                            <i className="fab fa-react role-icon-spin" /> React
-                        </div>
-
-                        {/* Progress arc (bottom right corner) */}
-                        <div className="mon-arcs">
-                            {[
-                                { label: 'Frontend', pct: 94, color: '#f5576c' },
-                                { label: 'Design', pct: 82, color: '#f093fb' },
-                                { label: 'React', pct: 90, color: '#61dafb' },
-                            ].map((r) => (
-                                <div key={r.label} className="arc-item">
-                                    <svg viewBox="0 0 44 44">
-                                        <circle cx="22" cy="22" r="18" className="arc-bg" />
-                                        <circle
-                                            cx="22" cy="22" r="18"
-                                            className="arc-fg"
-                                            style={{
-                                                stroke: r.color,
-                                                strokeDashoffset: `${113 - (113 * r.pct) / 100}`,
-                                            }}
-                                        />
-                                    </svg>
-                                    <span className="arc-pct" style={{ color: r.color }}>{r.pct}%</span>
-                                    <span className="arc-lbl">{r.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-    );
+          <div className="constellation-hud" aria-live="polite">
+            <AnimatePresence mode="wait">
+              {hovered && (
+                <motion.div
+                  key={hovered.id}
+                  className="hud-tooltip"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <strong className="tooltip-name">{hovered.name}</strong>
+                  <span className="tooltip-desc">{hovered.desc}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default Role;

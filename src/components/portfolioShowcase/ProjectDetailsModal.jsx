@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './ProjectDetailsModal.css';
-import mammoth from 'mammoth';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function DocxViewer({ docxUrl, title }) {
     const [htmlContent, setHtmlContent] = useState('');
@@ -11,21 +11,29 @@ function DocxViewer({ docxUrl, title }) {
         if (!docxUrl) return;
         setLoading(true);
         setError(null);
-        fetch(docxUrl)
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-                return res.arrayBuffer();
+        let cancelled = false;
+
+        Promise.all([import('mammoth'), fetch(docxUrl)])
+            .then(async ([mammothModule, response]) => {
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                const arrayBuffer = await response.arrayBuffer();
+                return mammothModule.default.convertToHtml({ arrayBuffer });
             })
-            .then(arrayBuffer => mammoth.convertToHtml({ arrayBuffer }))
-            .then(result => {
+            .then((result) => {
+                if (cancelled) return;
                 setHtmlContent(result.value);
                 setLoading(false);
             })
-            .catch(err => {
+            .catch((err) => {
+                if (cancelled) return;
                 console.error('Error loading DOCX:', err);
                 setError('Could not load document. ' + err.message);
                 setLoading(false);
             });
+
+        return () => {
+            cancelled = true;
+        };
     }, [docxUrl]);
 
     if (loading) {
@@ -40,7 +48,7 @@ function DocxViewer({ docxUrl, title }) {
     if (error) {
         return (
             <div className="docx-loading-container">
-                <i className="fas fa-exclamation-triangle text-red-500 mr-2" />
+                <i className="fas fa-exclamation-triangle mr-2" />
                 <span>{error}</span>
             </div>
         );
@@ -50,7 +58,7 @@ function DocxViewer({ docxUrl, title }) {
         <div className="docx-viewer-wrapper">
             <div className="docx-header-bar">
                 <div className="docx-title-chip">
-                    <i className="fas fa-file-word mr-2" style={{ color: '#3b82f6' }} />
+                    <i className="fas fa-file-word mr-2" style={{ color: "var(--maroon)" }} />
                     <span>aiadoption.docx (Complete Word Document)</span>
                 </div>
                 <div className="docx-scroll-hint">
@@ -71,6 +79,7 @@ function ModalImageSlider({ images, title }) {
 
     useEffect(() => {
         if (!images || images.length <= 1) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % images.length);
         }, 3000);
@@ -90,6 +99,7 @@ function ModalImageSlider({ images, title }) {
                     <button
                         type="button"
                         className="slider-arrow slider-arrow-left"
+                        aria-label={`Previous ${title} image`}
                         onClick={(e) => {
                             e.stopPropagation();
                             setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -100,6 +110,7 @@ function ModalImageSlider({ images, title }) {
                     <button
                         type="button"
                         className="slider-arrow slider-arrow-right"
+                        aria-label={`Next ${title} image`}
                         onClick={(e) => {
                             e.stopPropagation();
                             setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -117,6 +128,8 @@ function ModalImageSlider({ images, title }) {
                             key={idx}
                             type="button"
                             className={`slider-dot ${idx === currentIndex ? 'active' : ''}`}
+                            aria-label={`Show ${title} image ${idx + 1}`}
+                            aria-pressed={idx === currentIndex}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setCurrentIndex(idx);
@@ -133,21 +146,42 @@ function ModalImageSlider({ images, title }) {
     );
 }
 
-function ProjectDetailsModal({ project, onClose }) {
+function ProjectDialog({ project, onClose }) {
+    const modalRef = useRef(null);
+
     // Close modal on Escape key press or background click
     useEffect(() => {
         if (!project) return;
 
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') onClose();
+        const previousFocus = document.activeElement;
+        const previousOverflow = document.body.style.overflow;
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                onClose();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+
+            const focusable = modalRef.current?.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])');
+            if (!focusable?.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && (document.activeElement === first || document.activeElement === modalRef.current)) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
         };
         document.addEventListener('keydown', handleKeyDown);
-        // Lock body scroll when modal is open
         document.body.style.overflow = 'hidden';
+        modalRef.current?.focus();
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = '';
+            document.body.style.overflow = previousOverflow;
+            previousFocus?.focus?.();
         };
     }, [project, onClose]);
 
@@ -164,15 +198,31 @@ function ProjectDetailsModal({ project, onClose }) {
     const displayFeatures = project.features || defaultFeatures;
 
     return (
-        <div className="project-modal-backdrop" onClick={onClose}>
+        <motion.div
+            className="project-modal-backdrop"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+        >
             {/* Modal Content Box (Stop click propagation so clicking inside doesn't close modal) */}
-            <div
+            <motion.div
                 className="project-modal-container"
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="project-modal-title"
+                tabIndex="-1"
                 onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, y: 12, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.99 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
             >
                 {/* ---- Top Bar: Back Button & Breadcrumbs ---- */}
                 <div className="project-modal-topbar">
-                    <button className="project-modal-back-btn" onClick={onClose}>
+                    <button type="button" className="project-modal-back-btn" onClick={onClose} aria-label="Close project details">
                         <i className="fas fa-arrow-left" /> Back to Projects
                     </button>
                     <div className="project-modal-breadcrumb">
@@ -192,7 +242,7 @@ function ProjectDetailsModal({ project, onClose }) {
                             <i className={project.icon} /> {project.category}
                         </div>
 
-                        <h2 className="project-modal-title">{project.title}</h2>
+                        <h2 className="project-modal-title" id="project-modal-title">{project.title}</h2>
                         <p className="project-modal-description">{project.description}</p>
 
                         {/* Quick Stats Box */}
@@ -226,11 +276,11 @@ function ProjectDetailsModal({ project, onClose }) {
                                     rel="noopener noreferrer"
                                     className="modal-btn-primary"
                                 >
-                                    <i className="fas fa-external-link-alt" /> Live Demo
+                                    <i className="fas fa-external-link-alt" /> Project link
                                 </a>
                             ) : (
                                 <button className="modal-btn-primary disabled" title="Demo link not set yet">
-                                    <i className="fas fa-external-link-alt" /> Live Demo
+                                    <i className="fas fa-external-link-alt" /> Project link unavailable
                                 </button>
                             )}
 
@@ -277,8 +327,8 @@ function ProjectDetailsModal({ project, onClose }) {
                                     <span className="dot dot-y" />
                                     <span className="dot dot-g" />
                                 </div>
-                                <span className="modal-media-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <img src="/favicon.svg" alt="Dev Icon" className="project-browser-svg-icon" style={{ width: '18px', height: '18px', objectFit: 'contain' }} /> Live Preview & Video Showcase
+                                <span className="modal-media-title">
+                                    Project media
                                 </span>
                             </div>
 
@@ -298,17 +348,19 @@ function ProjectDetailsModal({ project, onClose }) {
                                     ) : (
                                         <video
                                             src={project.videoUrl}
+                                            poster={project.poster}
                                             controls
-                                            autoPlay
                                             loop
                                             muted
+                                            playsInline
+                                            preload="metadata"
                                             className="modal-video-element"
+                                            aria-label={`${project.title} project video`}
                                         />
                                     )
                                 ) : project.images && project.images.length > 0 ? (
                                     <ModalImageSlider images={project.images} title={project.title} />
                                 ) : (
-                                    /* If videoUrl is empty, render exact UI Mockup / Image with video note */
                                     <div className="modal-video-fallback">
                                         {project.image ? (
                                             <img
@@ -318,23 +370,11 @@ function ProjectDetailsModal({ project, onClose }) {
                                             />
                                         ) : (
                                             <div className="modal-fallback-vector" style={{ '--fc': project.color }}>
-                                                <i className={project.icon} />
-                                                <span>{project.title} UI Preview</span>
+                                                <i className={project.icon} aria-hidden="true" />
+                                                <span>No local preview available</span>
                                             </div>
                                         )}
 
-                                        {/* Video Upload Note Overlay */}
-                                        <div className="video-placeholder-banner">
-                                            <div className="video-play-icon" style={{ '--pc': project.color }}>
-                                                <i className="fas fa-play" />
-                                            </div>
-                                            <div className="video-note-text">
-                                                <h5>Add Live Video (`videoUrl`)</h5>
-                                                <p>
-                                                    Paste any MP4 video URL inside <code>videoUrl: "..."</code> in `PROJECTS_DATA` to display live project video!
-                                                </p>
-                                            </div>
-                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -343,7 +383,7 @@ function ProjectDetailsModal({ project, onClose }) {
                         {/* 2. Key Features Box */}
                         <div className="modal-features-card">
                             <h4 className="modal-features-title">
-                                <i className="fas fa-bolt text-yellow-400 mr-2" /> Key Features & Highlights
+                                <i className="fas fa-bolt mr-2" /> Key Features & Highlights
                             </h4>
                             <ul className="modal-features-list">
                                 {displayFeatures.map((feature, i) => (
@@ -358,8 +398,16 @@ function ProjectDetailsModal({ project, onClose }) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
+function ProjectDetailsModal({ project, onClose }) {
+    return (
+        <AnimatePresence>
+            {project && <ProjectDialog key={project.id} project={project} onClose={onClose} />}
+        </AnimatePresence>
     );
 }
 
