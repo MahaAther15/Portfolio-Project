@@ -100,10 +100,11 @@ function CustomVideoPlayer({ src, poster, title }) {
     };
 
     useEffect(() => {
+        const video = videoRef.current;
         return () => {
             if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-            if (videoRef.current) {
-                videoRef.current.pause();
+            if (video) {
+                video.pause();
             }
         };
     }, []);

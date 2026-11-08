@@ -10,14 +10,14 @@ function Contact() {
     message: '',
   });
 
-  const [status, setStatus] = useState({ type: null, text: '' });
+  const [status, setStatus] = useState({ type: null, text: '', mailtoUrl: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (status.type) setStatus({ type: null, text: '' });
+    if (status.type) setStatus({ type: null, text: '', mailtoUrl: null });
   };
 
   const copyEmail = () => {
@@ -29,52 +29,134 @@ function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const subject = formData.subject.trim();
+    const message = formData.message.trim();
+
+    if (!name || !email || !message) {
       setStatus({
         type: 'error',
         text: 'Please fill in your name, email and message, then try again.',
+        mailtoUrl: null,
       });
       return;
     }
 
     setIsSubmitting(true);
-    setStatus({ type: null, text: '' });
+    setStatus({ type: null, text: '', mailtoUrl: null });
 
-    const payload = JSON.stringify({
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject || `Portfolio Inquiry from ${formData.name}`,
-      message: formData.message,
-      _template: 'table',
-      _subject: `New Portfolio Message from ${formData.name}`,
-    });
+    const subjectText = subject || `Portfolio Inquiry from ${name}`;
+    const fullSubject = `New Portfolio Message from ${name} (${email})`;
 
+    const mailtoFallback = `mailto:mahaather45@gmail.com?subject=${encodeURIComponent(
+      subjectText
+    )}&body=${encodeURIComponent(
+      `From: ${name} (${email})\n\nMessage:\n${message}`
+    )}`;
+
+    let sent = false;
+
+    // 1. First attempt: Dedicated Vercel serverless function /api/contact
     try {
-      const response = await fetch('https://formsubmit.co/ajax/mahaather45@gmail.com', {
+      const apiResponse = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: payload,
+        body: JSON.stringify({
+          name,
+          email,
+          subject: subjectText,
+          message,
+        }),
       });
 
-      if (!response.ok) throw new Error('FormSubmit rejected the request.');
-      const result = await response.json();
-      if (result.success === 'false' || result.success === false) {
-        throw new Error('FormSubmit could not send the message.');
+      if (apiResponse.ok) {
+        const result = await apiResponse.json();
+        if (result.success) {
+          sent = true;
+        }
       }
+    } catch (err) {
+      console.warn('/api/contact unavailable, trying direct client-side delivery:', err);
+    }
 
+    // 2. Second attempt: Check if Web3Forms key is configured
+    if (!sent && import.meta.env.VITE_WEB3FORMS_KEY) {
+      try {
+        const web3Res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: import.meta.env.VITE_WEB3FORMS_KEY,
+            name,
+            email,
+            from_name: name,
+            reply_to: email,
+            subject: fullSubject,
+            message: `Sender Name: ${name}\nSender Email: ${email}\nSubject: ${subjectText}\n\nMessage:\n${message}`,
+          }),
+        });
+
+        const web3Data = await web3Res.json();
+        if (web3Data.success) {
+          sent = true;
+        }
+      } catch (err) {
+        console.warn('Web3Forms attempt error:', err);
+      }
+    }
+
+    // 3. Third attempt: FormSubmit with _captcha=false and _replyto
+    if (!sent) {
+      try {
+        const fsPayload = JSON.stringify({
+          name,
+          email,
+          _replyto: email,
+          message: `Sender: ${name} (${email})\n\nMessage:\n${message}`,
+          subject: subjectText,
+          _subject: fullSubject,
+          _captcha: 'false',
+          _template: 'table',
+        });
+
+        const fsRes = await fetch('https://formsubmit.co/ajax/mahaather45@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: fsPayload,
+        });
+
+        if (fsRes.ok) {
+          const fsData = await fsRes.json();
+          if (fsData.success === 'true' || fsData.success === true) {
+            sent = true;
+          }
+        }
+      } catch (err) {
+        console.warn('FormSubmit direct attempt error:', err);
+      }
+    }
+
+    // Status display
+    if (sent) {
       setStatus({
         type: 'success',
-        text: 'Message sent. Thanks for reaching out, I will reply soon.',
+        text: 'Message delivered! Thanks for reaching out, I will reply to your email soon.',
+        mailtoUrl: null,
       });
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch {
+    } else {
       setStatus({
-        type: 'error',
-        text: 'The message could not be sent. Please email mahaather45@gmail.com directly.',
+        type: 'fallback',
+        text: 'Automated delivery was blocked by your browser network. You can send this message directly in 1 click:',
+        mailtoUrl: mailtoFallback,
       });
-    } finally {
-      setIsSubmitting(false);
     }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -96,11 +178,32 @@ function Contact() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <i
-              className={status.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}
-              aria-hidden="true"
-            />
-            <span>{status.text}</span>
+            <div className="status-banner-content">
+              <div className="status-banner-main">
+                <i
+                  className={
+                    status.type === 'success'
+                      ? 'fas fa-check-circle'
+                      : status.type === 'fallback'
+                      ? 'fas fa-envelope-circle-check'
+                      : 'fas fa-exclamation-circle'
+                  }
+                  aria-hidden="true"
+                />
+                <span>{status.text}</span>
+              </div>
+              {status.mailtoUrl && (
+                <div className="status-banner-actions">
+                  <a
+                    href={status.mailtoUrl}
+                    className="status-mailto-btn"
+                  >
+                    <i className="fas fa-paper-plane mr-1" />
+                    Open in Email App
+                  </a>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 
@@ -121,6 +224,14 @@ function Contact() {
                   <span>{copiedEmail ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
+              <a
+                href="mailto:mahaather45@gmail.com"
+                className="direct-mail-button"
+                title="Send email directly via your mail app"
+              >
+                <i className="fas fa-envelope mr-2" />
+                Open Email App
+              </a>
             </div>
 
             <div className="channels-social-row">
