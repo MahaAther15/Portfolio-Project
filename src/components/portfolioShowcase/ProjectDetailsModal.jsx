@@ -74,6 +74,277 @@ function DocxViewer({ docxUrl, title }) {
 }
 
 
+function CustomVideoPlayer({ src, poster, title }) {
+    const videoRef = useRef(null);
+    const containerRef = useRef(null);
+    const controlsTimeoutRef = useRef(null);
+
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isBuffering, setIsBuffering] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isMuted, setIsMuted] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showControls, setShowControls] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    // Auto-hide controls when playing after 2.5 seconds of inactivity
+    const handleMouseMove = () => {
+        setShowControls(true);
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        if (isPlaying) {
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false);
+            }, 2500);
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            if (videoRef.current) {
+                videoRef.current.pause();
+            }
+        };
+    }, []);
+
+    // Toggle play / pause with promise error catching
+    const togglePlay = (e) => {
+        e?.stopPropagation?.();
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (video.paused || video.ended) {
+            setIsBuffering(true);
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        setIsPlaying(true);
+                        setIsBuffering(false);
+                    })
+                    .catch((err) => {
+                        console.warn('Playback prevented, retrying muted:', err);
+                        video.muted = true;
+                        setIsMuted(true);
+                        video.play()
+                            .then(() => {
+                                setIsPlaying(true);
+                                setIsBuffering(false);
+                            })
+                            .catch(() => {
+                                setIsBuffering(false);
+                                setIsPlaying(false);
+                            });
+                    });
+            }
+        } else {
+            video.pause();
+            setIsPlaying(false);
+            setIsBuffering(false);
+            setShowControls(true);
+        }
+    };
+
+    const toggleMute = (e) => {
+        e?.stopPropagation?.();
+        const video = videoRef.current;
+        if (!video) return;
+        video.muted = !video.muted;
+        setIsMuted(video.muted);
+    };
+
+    const handleSeek = (e) => {
+        e?.stopPropagation?.();
+        const video = videoRef.current;
+        if (!video) return;
+        const newTime = parseFloat(e.target.value);
+        video.currentTime = newTime;
+        setCurrentTime(newTime);
+    };
+
+    const toggleFullscreen = (e) => {
+        e?.stopPropagation?.();
+        if (!containerRef.current) return;
+        if (!document.fullscreenElement) {
+            containerRef.current.requestFullscreen?.().catch((err) => {
+                console.warn('Fullscreen request failed:', err);
+            });
+        } else {
+            document.exitFullscreen?.().catch(() => {});
+        }
+    };
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const formatTime = (secs) => {
+        if (isNaN(secs) || secs <= 0) return '0:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    return (
+        <div
+            className="custom-video-wrapper"
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+            onClick={togglePlay}
+        >
+            <video
+                ref={videoRef}
+                src={src}
+                poster={poster}
+                playsInline
+                preload="metadata"
+                className="custom-video-element"
+                aria-label={`${title} project video`}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onWaiting={() => setIsBuffering(true)}
+                onPlaying={() => {
+                    setIsBuffering(false);
+                    setIsPlaying(true);
+                }}
+                onCanPlay={() => setIsBuffering(false)}
+                onTimeUpdate={() => {
+                    if (videoRef.current) {
+                        setCurrentTime(videoRef.current.currentTime);
+                    }
+                }}
+                onLoadedMetadata={() => {
+                    if (videoRef.current) {
+                        setDuration(videoRef.current.duration);
+                    }
+                }}
+                onEnded={() => {
+                    setIsPlaying(false);
+                    setShowControls(true);
+                }}
+                onError={() => {
+                    setHasError(true);
+                    setIsBuffering(false);
+                }}
+            />
+
+            {/* Error Overlay Fallback */}
+            {hasError && (
+                <div className="custom-video-error-overlay" onClick={(e) => e.stopPropagation()}>
+                    <i className="fas fa-exclamation-circle custom-video-error-icon" />
+                    <p className="custom-video-error-text">Direct video stream unavailable on your connection.</p>
+                    <a
+                        href={src}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="custom-video-direct-btn"
+                        download
+                    >
+                        <i className="fas fa-arrow-up-right-from-square mr-1" /> Open Video Directly
+                    </a>
+                </div>
+            )}
+
+            {/* Prominent Center Play / Pause / Buffering Overlay */}
+            {!hasError && (!isPlaying || isBuffering || showControls) && (
+                <div
+                    className={`custom-video-center-overlay ${isPlaying ? 'overlay-playing' : 'overlay-idle'}`}
+                    onClick={togglePlay}
+                >
+                    {isBuffering ? (
+                        <div className="custom-video-spinner-box">
+                            <i className="fas fa-circle-notch fa-spin custom-video-spinner" />
+                            <span className="custom-video-loading-text">Loading video...</span>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            className={`custom-video-big-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
+                            aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                            onClick={togglePlay}
+                        >
+                            <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'} />
+                            {!isPlaying && (
+                                <span className="custom-video-play-hint">Play Video</span>
+                            )}
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Custom Bottom Control Bar */}
+            <div
+                className={`custom-video-controls-bar ${showControls || !isPlaying ? 'controls-visible' : 'controls-hidden'}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Progress Timeline Slider */}
+                <div className="custom-video-progress-container">
+                    <input
+                        type="range"
+                        min="0"
+                        max={duration || 100}
+                        step="0.1"
+                        value={currentTime}
+                        onChange={handleSeek}
+                        className="custom-video-seek-slider"
+                        aria-label="Seek video progress"
+                        style={{
+                            '--progress': `${duration ? (currentTime / duration) * 100 : 0}%`,
+                        }}
+                    />
+                </div>
+
+                {/* Controls Bottom Row */}
+                <div className="custom-video-buttons-row">
+                    <div className="custom-video-left-controls">
+                        <button
+                            type="button"
+                            className="custom-video-ctrl-btn"
+                            onClick={togglePlay}
+                            aria-label={isPlaying ? 'Pause' : 'Play'}
+                            title={isPlaying ? 'Pause' : 'Play'}
+                        >
+                            <i className={isPlaying ? 'fas fa-pause' : 'fas fa-play'} />
+                        </button>
+
+                        <button
+                            type="button"
+                            className="custom-video-ctrl-btn"
+                            onClick={toggleMute}
+                            aria-label={isMuted ? 'Unmute' : 'Mute'}
+                            title={isMuted ? 'Unmute' : 'Mute'}
+                        >
+                            <i className={isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'} />
+                        </button>
+
+                        <span className="custom-video-time">
+                            {formatTime(currentTime)} <span className="time-sep">/</span> {formatTime(duration)}
+                        </span>
+                    </div>
+
+                    <div className="custom-video-right-controls">
+                        <button
+                            type="button"
+                            className="custom-video-ctrl-btn"
+                            onClick={toggleFullscreen}
+                            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            title="Fullscreen"
+                        >
+                            <i className={isFullscreen ? 'fas fa-compress' : 'fas fa-expand'} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ModalImageSlider({ images, title }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -346,16 +617,10 @@ function ProjectDialog({ project, onClose }) {
                                             allowFullScreen
                                         />
                                     ) : (
-                                        <video
+                                        <CustomVideoPlayer
                                             src={project.videoUrl}
                                             poster={project.poster}
-                                            controls
-                                            loop
-                                            muted
-                                            playsInline
-                                            preload="metadata"
-                                            className="modal-video-element"
-                                            aria-label={`${project.title} project video`}
+                                            title={project.title}
                                         />
                                     )
                                 ) : project.images && project.images.length > 0 ? (
